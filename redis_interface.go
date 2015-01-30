@@ -1,8 +1,6 @@
 package redisapi
 
 type OrderSetRedis interface {
-	Exists(key string) bool
-
 	Zadd(key string, score int, value interface{}) error
 
 	Zrem(key string, value interface{}) error
@@ -35,6 +33,8 @@ type Redis interface {
 	QueueRedis
 	OrderSetRedis
 	HashRedis
+	Ping() bool
+	Exists(key string) bool
 
 	Set(key string, value []byte) error
 
