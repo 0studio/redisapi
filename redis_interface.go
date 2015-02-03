@@ -4,8 +4,13 @@ import (
 	"strconv"
 )
 
+type ScoreInterface interface {
+	GetScore() interface{}
+	GetMember() interface{}
+}
 type OrderSetRedis interface {
 	Zadd(key string, score int, value interface{}) error
+	ZaddBatch(key string, list []ScoreInterface) error
 	Zcard(key string) (int, error)
 	ZRrange(key string, begin int, end int) ([]ScoreStruct, error)
 	ZRevRrange(key string, begin int, end int) ([]ScoreStruct, error)

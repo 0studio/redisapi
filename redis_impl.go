@@ -211,6 +211,22 @@ func (this RedisClient) Zadd(key string, score int, value interface{}) error {
 	_, err := conn.Do("ZADD", key, score, value)
 	return err
 }
+func (this RedisClient) ZaddBatch(key string, list []ScoreInterface) error {
+	conn := this.connectInit()
+	defer conn.Close()
+	var cmdArgs []interface{} = make([]interface{}, 2*len(list)+1)
+	cmdArgs[0] = key
+	var idx int = 1
+	for _, scoreStruct := range list {
+		cmdArgs[idx] = scoreStruct.GetScore()
+		idx++
+		cmdArgs[idx] = scoreStruct.GetMember()
+		idx++
+
+	}
+	_, err := conn.Do("ZADD", cmdArgs...)
+	return err
+}
 
 func (this RedisClient) Zrem(key string, value interface{}) error {
 	conn := this.connectInit()
