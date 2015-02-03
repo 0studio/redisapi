@@ -6,14 +6,11 @@ import (
 
 type OrderSetRedis interface {
 	Zadd(key string, score int, value interface{}) error
-
-	Zrem(key string, value interface{}) error
-
 	Zcard(key string) (int, error)
-
 	ZRrange(key string, begin int, end int) ([]ScoreStruct, error)
-
 	ZRrank(key string, value interface{}) (int, error)
+	Zrem(key string, value interface{}) error
+	ZRemRangeByRank(key string, begin int, end int) error
 }
 
 type HashRedis interface {
@@ -68,6 +65,12 @@ type ScoreStruct struct {
 func (ss ScoreStruct) GetMemberAsString() string {
 	return string(ss.Member.([]uint8))
 }
+func (ss ScoreStruct) GetMemberAsUint64() (member uint64) {
+	var i int
+	i, _ = strconv.Atoi(string(ss.Member.([]uint8)))
+	return uint64(i)
+}
+
 func (ss ScoreStruct) GetScoreAsInt() (score int) {
 	score, _ = strconv.Atoi(string(ss.Score.([]uint8)))
 	return
