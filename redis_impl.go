@@ -211,7 +211,7 @@ func (this RedisClient) Zadd(key string, score int, value interface{}) error {
 	_, err := conn.Do("ZADD", key, score, value)
 	return err
 }
-func (this RedisClient) ZaddBatch(key string, list []ScoreInterface) error {
+func (this RedisClient) ZaddBatch(key string, list []ScoreStruct) error {
 	conn := this.connectInit()
 	defer conn.Close()
 	var cmdArgs []interface{} = make([]interface{}, 2*len(list)+1)

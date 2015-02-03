@@ -4,13 +4,9 @@ import (
 	"strconv"
 )
 
-type ScoreInterface interface {
-	GetScore() interface{}
-	GetMember() interface{}
-}
 type OrderSetRedis interface {
 	Zadd(key string, score int, value interface{}) error
-	ZaddBatch(key string, list []ScoreInterface) error
+	ZaddBatch(key string, list []ScoreStruct) error
 	Zcard(key string) (int, error)
 	ZRrange(key string, begin int, end int) ([]ScoreStruct, error)
 	ZRevRrange(key string, begin int, end int) ([]ScoreStruct, error)
@@ -67,6 +63,13 @@ type Redis interface {
 type ScoreStruct struct {
 	Member interface{}
 	Score  interface{}
+}
+
+func (ss ScoreStruct) GetMember() interface{} {
+	return ss.Member
+}
+func (ss ScoreStruct) GetScore() interface{} {
+	return ss.Score
 }
 
 func (ss ScoreStruct) GetMemberAsString() string {
