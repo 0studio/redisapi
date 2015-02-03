@@ -240,11 +240,36 @@ func (this RedisClient) ZRrank(key string, value interface{}) (int, error) {
 	conn := this.connectInit()
 	defer conn.Close()
 
-	v, err := redis.Int(conn.Do("ZREVRANK", key, value))
+	v, err := redis.Int(conn.Do("ZRANK", key, value))
 	return int(v), err
 }
 
 func (this RedisClient) ZRrange(key string, begin int, end int) (scoreStructList []ScoreStruct, err error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Values(conn.Do("ZRANGE", key, begin, end, "WITHSCORES"))
+	if err != nil {
+		return nil, err
+	}
+	length := len(v)
+	scoreStructList = make([]ScoreStruct, length/2)
+	for i := 0; i < length/2; i++ {
+		scoreStructList[i].Member = v[i*2]
+		scoreStructList[i].Score = v[i*2+1]
+	}
+	return
+}
+
+func (this RedisClient) ZRevRrank(key string, value interface{}) (int, error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Int(conn.Do("ZREVRANK", key, value))
+	return int(v), err
+}
+
+func (this RedisClient) ZRevRrange(key string, begin int, end int) (scoreStructList []ScoreStruct, err error) {
 	conn := this.connectInit()
 	defer conn.Close()
 

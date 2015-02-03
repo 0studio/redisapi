@@ -8,7 +8,9 @@ type OrderSetRedis interface {
 	Zadd(key string, score int, value interface{}) error
 	Zcard(key string) (int, error)
 	ZRrange(key string, begin int, end int) ([]ScoreStruct, error)
+	ZRevRrange(key string, begin int, end int) ([]ScoreStruct, error)
 	ZRrank(key string, value interface{}) (int, error)
+	ZRevRrank(key string, value interface{}) (int, error)
 	Zrem(key string, value interface{}) error
 	ZRemRangeByRank(key string, begin int, end int) error
 }
