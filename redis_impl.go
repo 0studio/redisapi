@@ -253,7 +253,7 @@ func (this RedisClient) ZRrange(key string, begin int, end int) (scoreStructList
 		return nil, err
 	}
 	length := len(v)
-	scoreStructList = make([]ScoreStruct, length)
+	scoreStructList = make([]ScoreStruct, length/2)
 	for i := 0; i < length/2; i++ {
 		scoreStructList[i].Member = v[i*2]
 		scoreStructList[i].Score = v[i*2+1]
