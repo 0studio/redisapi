@@ -1,5 +1,9 @@
 package redisapi
 
+import (
+	"strconv"
+)
+
 type OrderSetRedis interface {
 	Zadd(key string, score int, value interface{}) error
 
@@ -7,7 +11,7 @@ type OrderSetRedis interface {
 
 	Zcard(key string) (int, error)
 
-	ZRrange(key string, begin int, end int) ([]interface{}, error)
+	ZRrange(key string, begin int, end int) ([]ScoreStruct, error)
 
 	ZRrank(key string, value interface{}) (int, error)
 }
@@ -55,4 +59,16 @@ type Redis interface {
 	Pub(key string, value interface{}) error
 	Sub(keys ...string) ([]string, error)
 	UnSub(keys ...string) error
+}
+type ScoreStruct struct {
+	Member interface{}
+	Score  interface{}
+}
+
+func (ss ScoreStruct) GetMemberAsString() string {
+	return string(ss.Member.([]uint8))
+}
+func (ss ScoreStruct) GetScoreAsInt() (score int) {
+	score, _ = strconv.Atoi(string(ss.Score.([]uint8)))
+	return
 }

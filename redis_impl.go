@@ -236,12 +236,21 @@ func (this RedisClient) ZRrank(key string, value interface{}) (int, error) {
 	return int(v), err
 }
 
-func (this RedisClient) ZRrange(key string, begin int, end int) ([]interface{}, error) {
+func (this RedisClient) ZRrange(key string, begin int, end int) (scoreStructList []ScoreStruct, err error) {
 	conn := this.connectInit()
 	defer conn.Close()
 
 	v, err := redis.Values(conn.Do("ZREVRANGE", key, begin, end, "WITHSCORES"))
-	return v, err
+	if err != nil {
+		return nil, err
+	}
+	length := len(v)
+	scoreStructList = make([]ScoreStruct, length)
+	for i := 0; i < length/2; i++ {
+		scoreStructList[i].Member = v[i*2]
+		scoreStructList[i].Score = v[i*2+1]
+	}
+	return
 }
 
 // order set end
