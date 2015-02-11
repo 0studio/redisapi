@@ -103,3 +103,25 @@ func TestPubSub(t *testing.T) {
 	}
 
 }
+
+func TestHash(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	table := "hash_test"
+	var scoreList []ScoreStruct
+	scoreList = append(scoreList, ScoreStruct{Member: "111111", Score: 111111})
+	scoreList = append(scoreList, ScoreStruct{Member: "222222", Score: 222222})
+	err = client.HMset(table, scoreList)
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	scoreList, err = client.HMget(table, "111111", "222222")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	t.Log(scoreList)
+}

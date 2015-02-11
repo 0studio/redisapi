@@ -1,6 +1,7 @@
 package redisapi
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 	"time"
@@ -303,6 +304,87 @@ func (this RedisClient) ZRevRrange(key string, begin int, end int) (scoreStructL
 }
 
 // order set end
+
+// hash set begin
+
+func (rc RedisClient) Hexist(table, key string) bool {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Bool(conn.Do("HEXITS", table, key))
+	if err != nil {
+		return false
+	}
+	return v
+}
+
+func (rc RedisClient) Hdel(table, key string) error {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	_, err := conn.Do("HDEL", table, key)
+	return err
+}
+
+func (rc RedisClient) Hset(table, key string, value interface{}) error {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	_, err := conn.Do("HSET", table, key, value)
+	return err
+}
+
+func (rc RedisClient) HMset(table string, scoreList []ScoreStruct) error {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	var interList []interface{}
+	interList = append(interList, table)
+	for _, score := range scoreList {
+		interList = append(interList, score.GetMember())
+		interList = append(interList, score.GetScore())
+	}
+	_, err := conn.Do("HMSET", interList...)
+	return err
+}
+
+func (rc RedisClient) Hget(table, key string) (interface{}, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	v, err := conn.Do("HGET", table, key)
+	return v.(interface{}), err
+}
+
+func (rc RedisClient) HMget(table string, keys ...string) ([]ScoreStruct, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	argList := make([]interface{}, len(keys)+1)
+	argList[0] = table
+	for i := 1; i <= len(keys); i++ {
+		argList[i] = keys[i-1]
+	}
+	var scoreList []ScoreStruct
+	values, err := redis.Strings(conn.Do("HMGET", argList...))
+	if err != nil {
+		return scoreList, err
+	}
+
+	if len(keys) != len(values) {
+		return scoreList, errors.New("count error for hmget result.")
+	}
+
+	length := len(keys)
+	scoreList = make([]ScoreStruct, length)
+	for i := 0; i < length; i++ {
+		scoreList[i].Member = keys[i]
+		scoreList[i].Score = values[i]
+	}
+	return scoreList, nil
+}
+
+// hash set end
 
 func (rc RedisClient) Pub(key string, value interface{}) error {
 	conn := rc.connectInit()

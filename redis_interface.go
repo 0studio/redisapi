@@ -17,9 +17,12 @@ type OrderSetRedis interface {
 }
 
 type HashRedis interface {
-	// Hdel(table, key string, value interface{}) error
-
-	// Hset(table, key string, value interface{})
+	Hexist(table, key string) bool
+	Hdel(table string, key string) error
+	Hset(table, key string, value interface{}) error
+	HMset(table string, scoreList []ScoreStruct) error
+	Hget(table, key string) (interface{}, error)
+	HMget(table string, keys ...string) ([]ScoreStruct, error)
 }
 
 type QueueRedis interface {
