@@ -1,6 +1,7 @@
 package redisapi
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -85,6 +86,14 @@ func (ss ScoreStruct) GetMemberAsUint64() (member uint64) {
 }
 
 func (ss ScoreStruct) GetScoreAsInt() (score int) {
-	score, _ = strconv.Atoi(string(ss.Score.([]uint8)))
+	var e error
+	score, e = strconv.Atoi(string(ss.Score.([]uint8)))
+	if e != nil {
+		f, e := strconv.ParseFloat((string(ss.Score.([]uint8))), 10)
+		if e != nil {
+			fmt.Println("redisapi.GetScoreAsInt error", e)
+		}
+		score = int(f)
+	}
 	return
 }
