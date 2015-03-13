@@ -15,6 +15,7 @@ type OrderSetRedis interface {
 	ZRevRrank(key string, value interface{}) (int, error)
 	Zrem(key string, value interface{}) error
 	ZRemRangeByRank(key string, begin int, end int) error
+	ZRemRangeByScore(key string, min, max interface{}) error
 }
 
 type HashRedis interface {

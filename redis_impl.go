@@ -244,6 +244,13 @@ func (this RedisClient) ZRemRangeByRank(key string, start, end int) error {
 	_, err := conn.Do("ZREMRANGEBYRANK", key, start, end)
 	return err
 }
+func (this RedisClient) ZRemRangeByScore(key string, min, max interface{}) error {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	_, err := conn.Do("ZREMRANGEBYSCORE", key, min, max)
+	return err
+}
 
 func (this RedisClient) Zcard(key string) (int, error) {
 	conn := this.connectInit()

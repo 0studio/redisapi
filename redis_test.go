@@ -125,3 +125,159 @@ func TestHash(t *testing.T) {
 	}
 	t.Log(scoreList)
 }
+
+func TestZ(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 300, "mem3")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 200, "mem2")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	cnt, err := client.Zcard("key")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	rank, err := client.ZRrank("key", "mem3")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	if rank != 2 {
+		t.Errorf("zrank error\r\n", rank)
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 3 {
+		t.Errorf("zrange error\r\n", rank)
+	}
+
+	if list[0].GetMemberAsString() != "mem1" {
+		t.Errorf("zrange order error\r\n", rank)
+	}
+	if list[1].GetMemberAsString() != "mem2" {
+		t.Errorf("zrange order error\r\n", rank)
+	}
+	if list[2].GetMemberAsString() != "mem3" {
+		t.Errorf("zrange order error\r\n", rank)
+	}
+
+	list, err = client.ZRevRrange("key", 0, -1)
+	if list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("zrevrange order error\r\n", rank)
+	}
+	if list[1].GetMemberAsString() != "mem2" {
+		t.Errorf("zrevrange order error\r\n", rank)
+	}
+	if list[2].GetMemberAsString() != "mem1" {
+		t.Errorf("zrevrange order error\r\n", rank)
+	}
+
+}
+
+func TestZRem(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByRank("key", 0, 1)
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+
+}
+
+func TestZRem2(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByScore("key", "99", "201")
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+
+}
+
+func TestZRem3(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByScore("key", "99", "inf")
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 0 {
+		t.Errorf("ZRemRangeByRank error\r\n", len(list))
+	}
+
+}
+
+func TestZRem4(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByScore("key", 99, 201)
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+
+}
