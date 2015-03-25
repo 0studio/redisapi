@@ -1,6 +1,8 @@
 package redisapi
 
 import "testing"
+import "fmt"
+import "github.com/garyburd/redigo/redis"
 
 func TestExists(t *testing.T) {
 	client, err := InitDefaultClient(":6379")
@@ -279,5 +281,74 @@ func TestZRem4(t *testing.T) {
 	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
 		t.Errorf("ZRemRangeByRank error\r\n")
 	}
+
+}
+
+func TestZScore(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 10000000000000000, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	score, err := client.ZScore("key", "mem1")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+
+	score, err = client.ZScore("key", "mem3")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+
+	score, err = client.ZScore("key", "not_exists")
+	if err != redis.ErrNil {
+		t.Error("zscore should be nil")
+	}
+
+	fmt.Println(score, err)
+
+}
+
+func TestZScoreFloat64(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 10000000000000000, "mem3")
+	err = client.Zadd("key", 1E+100, "mem2")
+	score, err := client.ZScoreAsFloat64("key", "mem1")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+
+	score, err = client.ZScoreAsFloat64("key", "mem3")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+	fmt.Println(score)
+
+	score, err = client.ZScoreAsFloat64("key", "mem2")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+	fmt.Println(score)
 
 }

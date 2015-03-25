@@ -205,13 +205,14 @@ func (rc RedisClient) ClearAll() error {
 }
 
 // order set begin
-func (this RedisClient) Zadd(key string, score int, value interface{}) error {
+func (this RedisClient) Zadd(key string, score interface{}, value interface{}) error {
 	conn := this.connectInit()
 	defer conn.Close()
 
 	_, err := conn.Do("ZADD", key, score, value)
 	return err
 }
+
 func (this RedisClient) ZaddBatch(key string, list []ScoreStruct) error {
 	conn := this.connectInit()
 	defer conn.Close()
@@ -227,6 +228,21 @@ func (this RedisClient) ZaddBatch(key string, list []ScoreStruct) error {
 	}
 	_, err := conn.Do("ZADD", cmdArgs...)
 	return err
+}
+
+func (this RedisClient) ZScore(key string, value interface{}) (int, error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	return redis.Int(conn.Do("ZSCORE", key, value))
+
+}
+
+func (this RedisClient) ZScoreAsFloat64(key string, value interface{}) (float64, error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	return redis.Float64(conn.Do("ZSCORE", key, value))
 }
 
 func (this RedisClient) Zrem(key string, value interface{}) error {

@@ -6,7 +6,9 @@ import (
 )
 
 type OrderSetRedis interface {
-	Zadd(key string, score int, value interface{}) error
+	Zadd(key string, score interface{}, value interface{}) error
+	ZScore(key string, value interface{}) (int, error)
+	ZScoreAsFloat64(key string, value interface{}) (float64, error)
 	ZaddBatch(key string, list []ScoreStruct) error
 	Zcard(key string) (int, error)
 	ZRrange(key string, begin int, end int) ([]ScoreStruct, error)
