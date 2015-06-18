@@ -204,6 +204,89 @@ func (rc RedisClient) ClearAll() error {
 	return err
 }
 
+func (this RedisClient) Sadd(key string, value ...interface{}) error {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	params := []interface{}{key}
+	params = append(params, value...)
+	_, err := conn.Do("SADD", params...)
+	return err
+}
+
+func (this RedisClient) Scard(key string) (int, error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Int(conn.Do("SCARD", key))
+	return int(v), err
+}
+
+func (rc RedisClient) SisMember(key string, value interface{}) bool {
+	conn := rc.connectInit()
+	defer conn.Close()
+	v, err := redis.Bool(conn.Do("SIsMember", key, value))
+	if err != nil {
+		return false
+	}
+	return v
+}
+
+func (rc RedisClient) Smembers(key string) (members []interface{}, err error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	members, err = redis.Values(conn.Do("SMembers", key))
+	return
+}
+func (rc RedisClient) SmembersAsString(key string) (members []string, err error) {
+	ms, err := rc.Smembers(key)
+	if err != nil {
+		return
+	}
+	members = make([]string, len(ms), len(ms))
+	for idx, m := range ms {
+		members[idx] = string(m.([]uint8))
+	}
+	return
+}
+
+func (this RedisClient) Spop(key string) (value interface{}, err error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	return conn.Do("SPop", key)
+
+}
+func (this RedisClient) SpopAsString(key string) (value string, err error) {
+	return redis.String(this.Spop(key))
+
+}
+func (this RedisClient) SrandMember(key string) (value interface{}, err error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	return conn.Do("SRandMember", key)
+
+}
+func (this RedisClient) SrandMemberAsString(key string) (value string, err error) {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	return redis.String(conn.Do("SRandMember", key))
+
+}
+func (this RedisClient) Srem(key string, value ...interface{}) error {
+	conn := this.connectInit()
+	defer conn.Close()
+
+	params := []interface{}{key}
+	params = append(params, value...)
+
+	_, err := conn.Do("SRem", params...)
+	return err
+}
+
 // order set begin
 func (this RedisClient) Zadd(key string, score interface{}, value interface{}) error {
 	conn := this.connectInit()

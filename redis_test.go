@@ -352,3 +352,52 @@ func TestZScoreFloat64(t *testing.T) {
 	fmt.Println(score)
 
 }
+
+func TestSadd(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Sadd("setkey", "mem1")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Sadd("setkey", "mem2", "mem3")
+	n, err := client.Scard("setkey")
+	if n != 3 {
+		t.Errorf("scard \r\n", err)
+
+	}
+	exits := client.SisMember("setkey", "mem1")
+	if !exits {
+		t.Errorf("SisMembererror \r\n", err)
+
+	}
+	members, err := client.Smembers("setkey")
+	fmt.Println(members)
+	if len(members) != 3 {
+		t.Errorf("Smembers \r\n", err)
+
+	}
+	members2, err := client.SmembersAsString("setkey")
+	fmt.Println("members", members2)
+	if len(members2) != 3 {
+		t.Errorf("Smembers \r\n", err)
+	}
+
+	err = client.Srem("setkey", "mem1")
+	if err != nil {
+		t.Errorf("Srem \r\n", err)
+	}
+	m, err := client.SpopAsString("setkey")
+	fmt.Println(m)
+	if err != nil {
+		t.Errorf("SpopAsString \r\n", err)
+	}
+	m3, err := client.SrandMemberAsString("setkey")
+	fmt.Println(m3)
+	if err != nil {
+		t.Errorf("SrandMember \r\n", err)
+	}
+
+}

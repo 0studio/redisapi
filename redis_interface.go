@@ -5,6 +5,19 @@ import (
 	"strconv"
 )
 
+type SetRedis interface {
+	Sadd(key string, value ...interface{}) error
+	Scard(key string) (int, error)
+	SisMember(key string, value interface{}) bool
+	Smembers(key string) (members []interface{}, err error)
+	SmembersAsString(key string) (members []string, err error)
+	Spop(key string) (interface{}, error)
+	SpopAsString(key string) (string, error)
+	Srem(key string, value ...interface{}) error
+	SrandMember(key string) (interface{}, error)
+	SrandMemberAsString(key string) (string, error)
+}
+
 type OrderSetRedis interface {
 	Zadd(key string, score interface{}, value interface{}) error
 	ZScore(key string, value interface{}) (int, error)
@@ -42,6 +55,7 @@ type QueueRedis interface {
 
 type Redis interface {
 	QueueRedis
+	SetRedis
 	OrderSetRedis
 	HashRedis
 	Ping() bool
