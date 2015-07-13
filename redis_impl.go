@@ -83,6 +83,17 @@ func (rc RedisClient) Rpop(key string) (interface{}, error) {
 	return value, err
 }
 
+func (rc RedisClient) Llen(key string) (int, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	length, err := redis.Int(conn.Do("LLEN", key))
+	if err != nil {
+		return 0, err
+	}
+	return length, nil
+}
+
 func (this RedisClient) Lset(key string, index int, value interface{}) error {
 	conn := this.connectInit()
 	defer conn.Close()
@@ -311,11 +322,19 @@ func (rc RedisClient) Hexist(table, key string) bool {
 	conn := rc.connectInit()
 	defer conn.Close()
 
-	v, err := redis.Bool(conn.Do("HEXITS", table, key))
+	v, err := redis.Bool(conn.Do("HEXISTS", table, key))
 	if err != nil {
 		return false
 	}
 	return v
+}
+
+func (rc RedisClient) Hgetall(table string) ([]string, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Strings(conn.Do("HGETALL", table))
+	return v, err
 }
 
 func (rc RedisClient) Hdel(table, key string) error {

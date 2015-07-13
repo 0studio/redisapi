@@ -18,6 +18,7 @@ type OrderSetRedis interface {
 
 type HashRedis interface {
 	Hexist(table, key string) bool
+	Hgetall(table string) ([]string, error)
 	Hdel(table string, key string) error
 	Hset(table, key string, value interface{}) error
 	HMset(table string, scoreList []ScoreStruct) error
@@ -30,6 +31,7 @@ type QueueRedis interface {
 	Rpush(key string, value interface{}) error
 	Lrange(key string, start, end int) ([]interface{}, error)
 	Rpop(key string) (interface{}, error)
+	Llen(key string) (int, error)
 	Lset(key string, index int, value interface{}) error
 	Ltrim(key string, start, end int) error
 	Brpop(key string, timeoutSecs int) (interface{}, error)
