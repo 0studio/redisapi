@@ -1,6 +1,8 @@
 package redisapi
 
 import "testing"
+import "fmt"
+import "github.com/garyburd/redigo/redis"
 
 func TestExists(t *testing.T) {
 	client, err := InitDefaultClient(":6379")
@@ -124,4 +126,278 @@ func TestHash(t *testing.T) {
 		t.Errorf("%s\r\n", err.Error())
 	}
 	t.Log(scoreList)
+}
+
+func TestZ(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 300, "mem3")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 200, "mem2")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	cnt, err := client.Zcard("key")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	rank, err := client.ZRrank("key", "mem3")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	if rank != 2 {
+		t.Errorf("zrank error\r\n", rank)
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 3 {
+		t.Errorf("zrange error\r\n", rank)
+	}
+
+	if list[0].GetMemberAsString() != "mem1" {
+		t.Errorf("zrange order error\r\n", rank)
+	}
+	if list[1].GetMemberAsString() != "mem2" {
+		t.Errorf("zrange order error\r\n", rank)
+	}
+	if list[2].GetMemberAsString() != "mem3" {
+		t.Errorf("zrange order error\r\n", rank)
+	}
+
+	list, err = client.ZRevRrange("key", 0, -1)
+	if list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("zrevrange order error\r\n", rank)
+	}
+	if list[1].GetMemberAsString() != "mem2" {
+		t.Errorf("zrevrange order error\r\n", rank)
+	}
+	if list[2].GetMemberAsString() != "mem1" {
+		t.Errorf("zrevrange order error\r\n", rank)
+	}
+
+}
+
+func TestZRem(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByRank("key", 0, 1)
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+
+}
+
+func TestZRem2(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByScore("key", "99", "201")
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+
+}
+
+func TestZRem3(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByScore("key", "99", "inf")
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 0 {
+		t.Errorf("ZRemRangeByRank error\r\n", len(list))
+	}
+
+}
+
+func TestZRem4(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 300, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	cnt, err := client.Zcard("key")
+	if cnt != 3 {
+		t.Errorf("zcard error\r\n")
+	}
+	err = client.ZRemRangeByScore("key", 99, 201)
+	if err != nil {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+	list, err := client.ZRrange("key", 0, -1)
+	if len(list) != 1 || list[0].GetMemberAsString() != "mem3" {
+		t.Errorf("ZRemRangeByRank error\r\n")
+	}
+
+}
+
+func TestZScore(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 10000000000000000, "mem3")
+	err = client.Zadd("key", 200, "mem2")
+	score, err := client.ZScore("key", "mem1")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+
+	score, err = client.ZScore("key", "mem3")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+
+	score, err = client.ZScore("key", "not_exists")
+	if err != redis.ErrNil {
+		t.Error("zscore should be nil")
+	}
+
+	fmt.Println(score, err)
+
+}
+
+func TestZScoreFloat64(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Zadd("key", 100, "mem1")
+	err = client.Zadd("key", 10000000000000000, "mem3")
+	err = client.Zadd("key", 1E+100, "mem2")
+	score, err := client.ZScoreAsFloat64("key", "mem1")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+
+	score, err = client.ZScoreAsFloat64("key", "mem3")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+	fmt.Println(score)
+
+	score, err = client.ZScoreAsFloat64("key", "mem2")
+	if err != nil {
+		t.Error("zscore error", err)
+	}
+	if score == 0 {
+		t.Error("zscore error", err)
+	}
+	fmt.Println(score)
+
+}
+
+func TestSadd(t *testing.T) {
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Sadd("setkey", "mem1")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.Sadd("setkey", "mem2", "mem3")
+	n, err := client.Scard("setkey")
+	if n != 3 {
+		t.Errorf("scard \r\n", err)
+
+	}
+	exits := client.SisMember("setkey", "mem1")
+	if !exits {
+		t.Errorf("SisMembererror \r\n", err)
+
+	}
+	members, err := client.Smembers("setkey")
+	fmt.Println(members)
+	if len(members) != 3 {
+		t.Errorf("Smembers \r\n", err)
+
+	}
+	members2, err := client.SmembersAsString("setkey")
+	fmt.Println("members", members2)
+	if len(members2) != 3 {
+		t.Errorf("Smembers \r\n", err)
+	}
+
+	err = client.Srem("setkey", "mem1")
+	if err != nil {
+		t.Errorf("Srem \r\n", err)
+	}
+	m, err := client.SpopAsString("setkey")
+	fmt.Println(m)
+	if err != nil {
+		t.Errorf("SpopAsString \r\n", err)
+	}
+	m3, err := client.SrandMemberAsString("setkey")
+	fmt.Println(m3)
+	if err != nil {
+		t.Errorf("SrandMember \r\n", err)
+	}
+
 }
