@@ -478,7 +478,11 @@ func (rc RedisClient) Hget(table, key string) (interface{}, error) {
 	defer conn.Close()
 
 	v, err := conn.Do("HGET", table, key)
-	return v.(interface{}), err
+	if v == nil {
+		return nil, err
+	} else {
+		return v.(interface{}), err
+	}
 }
 
 func (rc RedisClient) HMget(table string, keys ...string) ([]ScoreStruct, error) {
