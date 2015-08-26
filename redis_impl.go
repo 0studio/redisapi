@@ -185,6 +185,14 @@ func (rc RedisClient) Decr(key string, step uint64) (int64, error) {
 	return value.(int64), err
 }
 
+func (rc RedisClient) Expire(key string, sec int64) error {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	_, err := conn.Do("EXPIRE", key, sec)
+	return err
+}
+
 func (rc RedisClient) MultiGet(keys []interface{}) ([]interface{}, error) {
 	conn := rc.connectInit()
 	defer conn.Close()
