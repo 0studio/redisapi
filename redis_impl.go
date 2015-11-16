@@ -451,6 +451,14 @@ func (rc RedisClient) Hgetall(table string) ([]string, error) {
 	return v, err
 }
 
+func (rc RedisClient) Hkeys(table string) ([]string, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Strings(conn.Do("HKEYS", table))
+	return v, err
+}
+
 func (rc RedisClient) Hdel(table, key string) error {
 	conn := rc.connectInit()
 	defer conn.Close()

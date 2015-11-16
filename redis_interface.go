@@ -41,6 +41,7 @@ type HashRedis interface {
 	HMset(table string, scoreList []ScoreStruct) error
 	Hget(table, key string) (interface{}, error)
 	HMget(table string, keys ...string) ([]ScoreStruct, error)
+	Hkeys(table string) ([]string, error)
 }
 
 type QueueRedis interface {
