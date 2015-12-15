@@ -77,6 +77,10 @@ type Redis interface {
 
 	Expire(key string, sec int64) error
 
+	Ttl(key string) (int32, error)
+
+	Persist(key string) error
+
 	MultiGet(keys []interface{}) ([]interface{}, error)
 
 	MultiSet(kvMap map[string][]byte) error

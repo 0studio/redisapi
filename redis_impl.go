@@ -193,6 +193,22 @@ func (rc RedisClient) Expire(key string, sec int64) error {
 	return err
 }
 
+func (rc RedisClient) Ttl(key string) (int32, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	v, err := redis.Int(conn.Do("TTL", key))
+	return int32(v), err
+}
+
+func (rc RedisClient) Persist(key string) error {
+	conn := rc.connectInit()
+	defer conn.Close()
+
+	_, err := conn.Do("PERSIST", key)
+	return err
+}
+
 func (rc RedisClient) MultiGet(keys []interface{}) ([]interface{}, error) {
 	conn := rc.connectInit()
 	defer conn.Close()
