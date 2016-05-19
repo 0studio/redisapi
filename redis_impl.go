@@ -209,6 +209,14 @@ func (rc RedisClient) Persist(key string) error {
 	return err
 }
 
+func (rc RedisClient) Keys(key string) ([]string, error) {
+	conn := rc.connectInit()
+	defer conn.Close()
+	
+	vList, err := redis.Strings(conn.Do("KEYS", key))
+	return vList, err
+}
+
 func (rc RedisClient) MultiGet(keys []interface{}) ([]interface{}, error) {
 	conn := rc.connectInit()
 	defer conn.Close()

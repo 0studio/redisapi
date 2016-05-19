@@ -80,6 +80,8 @@ type Redis interface {
 	Ttl(key string) (int32, error)
 
 	Persist(key string) error
+	
+	Keys(key string) ([]string, error)
 
 	MultiGet(keys []interface{}) ([]interface{}, error)
 
