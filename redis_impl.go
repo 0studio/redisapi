@@ -14,6 +14,121 @@ type RedisClient struct {
 	addr string
 }
 
+
+//REDIS GEO
+type GeoOption func(* geoOption)
+type geoOption struct {
+	distanceUnit string // m | km | mi | ft
+	sort string   // ASC | DESC
+	withOpt []string // WITHDIST | WITHCOORD | WITHHASH
+}
+type Coordinate struct {
+	longitude float64
+	latitude float64
+}
+
+type GeoRadiusEle struct {
+	value string
+	distance float64
+	coordinae Coordinate
+}
+const(
+	WITHDIST="WITHDIST"
+	WITHCOORD="WITHCOORD"
+	WITHHASH = "WITHHASH"
+	ASC = "ASC"
+	DESC = "DESC"
+	DistanceUnitM = "m"
+	DistanceUnitKM = "km"
+	DistanceUnitFT = "ft"
+	DistanceUnitMI = "mi"
+)
+
+func SetDistancUnit(distanceUnit string ) func (*geoOption){
+	var distanceUnitTmp string
+	if (distanceUnit == DistanceUnitM || distanceUnit == DistanceUnitKM || distanceUnit == DistanceUnitMI || distanceUnit == DistanceUnitFT){
+		distanceUnitTmp = distanceUnit
+	}
+	distanceUnitTmp = DistanceUnitM
+	return func(o *geoOption){
+		o.distanceUnit = distanceUnitTmp
+	}
+}
+
+func SetSort(sort string) func (* geoOption){
+	if (sort == ASC || sort == DESC ){
+		return func(o *geoOption){
+			o.sort = sort
+		}
+	}
+	return func(o *geoOption){
+	}
+}
+
+func SetWith(with string) func (* geoOption){
+	if(with == WITHDIST || with == WITHCOORD || with == WITHHASH){
+		return func(o *geoOption){
+			o.withOpt = with
+		}
+	}
+	return func(o *geoOption){
+
+	}
+}
+
+func (rc RedisClient) GeoAdd(key string  ,c Coordinate,value string) error{
+	conn := rc.connectInit()
+	defer conn.Close()
+	_, err := conn.Do("GEOADD",key ,c.longitude,c.latitude,value)
+	return err
+}
+
+func (rc RedisClient) GeoPos(key string,value string) ( Coordinate,error){
+	conn := rc.connectInit()
+	defer conn.Close()
+	v,err := conn.Do("GEOPOS",key,value)
+	if (err != nil || len(v) != 2){
+		return nil,err
+	}
+
+	return Coordinate{
+		latitude:v[0],
+		longitude:v[1],
+	},nil
+}
+
+func (rc RedisClient) GeoDist(key string,value1 string,value2 string) (float64,error){
+	conn := rc.connectInit()
+	defer conn.Close()
+	return redis.Float64(conn.Do("GEODIST",value1,value2))
+}
+
+func (rc RedisClient) GeoRadius(key string, c Coordinate,maxDis float64,opt...GeoOption){
+	conn := rc.connectInit()
+	defer conn.Close()
+	geoOpt := &geoOption{}
+	for _,v := range opt{
+		v(geoOpt)
+	}
+	v,err := conn.Do("GEORADIUS",key,c.latitude,c.longitude,maxDis,geoOpt.distanceUnit,geoOpt.withOpt,geoOpt.sort)
+	length := len(v)
+	geoRadius := make([]GeoRadiusEle,length/2)
+	switch geoOpt.withOpt {
+	case WITHDIST:
+		for i:=1;i <= len(v)/2;i++{
+			for i := 0; i < length/2; i++ {
+				geoRadius[i].value = v[i*2]
+				geoRadius[i].distance = v[i*2+1]
+			}
+		}
+	case WITHCOORD:
+		for i:=1;i<=len(v);i++{
+
+		}
+	}
+}
+
+
 func (rc RedisClient) Exists(key string) bool {
 	conn := rc.connectInit()
 	defer conn.Close()
@@ -638,4 +753,6 @@ func InitRedisClient(addr string, DB,MaxActive, MaxIdle int, Wait bool) (*RedisC
 func InitDefaultClient(addr string) (Redis, error) {
 	return InitRedisClient(addr, 0,0, 3, true)
 }
+
+
 
