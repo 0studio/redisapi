@@ -22,8 +22,8 @@ type geoOption struct {
 	withOpt string // WITHDIST | WITHCOORD | WITHHASH
 }
 type Coordinate struct {
-	longitude interface{}
-	latitude interface{}
+	Longitude interface{}
+	Latitude interface{}
 }
 
 type GeoRadiusEle struct {
@@ -77,10 +77,10 @@ func SetWith(with string) func (* geoOption){
 	}
 }
 
-func (rc RedisClient) GeoAdd(key string  ,c Coordinate,value string) error{
+func (rc RedisClient) GeoAdd(key string  ,c Coordinate ,value string) error{
 	conn := rc.connectInit()
 	defer conn.Close()
-	_, err := conn.Do("GEOADD",key ,c.longitude,c.latitude,value)
+	_, err := conn.Do("GEOADD",key ,c.Longitude,c.Latitude,value)
 
 	return err
 }
@@ -94,8 +94,8 @@ func (rc RedisClient) GeoPos(key string,value string) ( *Coordinate,error){
 	}
 
 	return &Coordinate{
-		latitude:v[0],
-		longitude:v[1],
+		Latitude:v[0],
+		Longitude:v[1],
 	},nil
 }
 
@@ -119,9 +119,9 @@ func (rc RedisClient) GeoRadius(key string, c Coordinate,maxDis float64,opt...Ge
 	var v []interface{}
 	var err error
 	if geoOpt.withOpt == WITHBOth{
-		v,err = redis.Values(conn.Do("GEORADIUS",key,c.longitude,c.latitude,maxDis,geoOpt.distanceUnit,WITHCOORD,WITHDIST,geoOpt.sort))
+		v,err = redis.Values(conn.Do("GEORADIUS",key,c.Longitude,c.Latitude,maxDis,geoOpt.distanceUnit,WITHCOORD,WITHDIST,geoOpt.sort))
 	}else{
-		v,err = redis.Values(conn.Do("GEORADIUS",key,c.longitude,c.latitude,maxDis,geoOpt.distanceUnit,geoOpt.withOpt,geoOpt.sort))
+		v,err = redis.Values(conn.Do("GEORADIUS",key,c.Longitude,c.Latitude,maxDis,geoOpt.distanceUnit,geoOpt.withOpt,geoOpt.sort))
 	}
 	if err != nil {
 		return nil,err
@@ -175,7 +175,7 @@ func makeGeoRadiusEle(v []interface{},geoOpt *geoOption) *[]GeoRadiusEle{
 			if err  != nil {
 				break
 			}
-			coordinate := Coordinate{longitude:vvv[0] ,latitude:vvv[1]}
+			coordinate := Coordinate{Longitude:vvv[0] ,Latitude:vvv[1]}
 			geoRadius[i].coordinae = coordinate
 		}
 	case WITHBOth:
@@ -191,7 +191,7 @@ func makeGeoRadiusEle(v []interface{},geoOpt *geoOption) *[]GeoRadiusEle{
 			if err  != nil {
 				break
 			}
-			coordinate := Coordinate{longitude:vvv[0] ,latitude:vvv[1]}
+			coordinate := Coordinate{Longitude:vvv[0] ,Latitude:vvv[1]}
 			geoRadius[i].coordinae = coordinate
 		}
 	}

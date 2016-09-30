@@ -408,16 +408,16 @@ func TestGeo(t *testing.T){
 	if err != nil {
 		t.Errorf("%s\r\n", err.Error())
 	}
-	err = client.GeoAdd("test",Coordinate{latitude:22.8777898943,longitude:114.6834120888},"huizhou")
+	err = client.GeoAdd("test",Coordinate{Latitude:22.8777898943,Longitude:114.6834120888},"huizhou")
 	if err != nil{
 		t.Errorf("%s\r\n", err.Error())
 	}
 
-	err = client.GeoAdd("test",Coordinate{latitude:22.4421753709,longitude:114.1678601427},"hongkong")
+	err = client.GeoAdd("test",Coordinate{Latitude:22.4421753709,Longitude:114.1678601427},"hongkong")
 	if err != nil{
 		t.Errorf("%s\r\n", err.Error())
 	}
-	BaoanCoordinate := Coordinate{latitude:22.6679807509,longitude:113.8106668351}
+	BaoanCoordinate := Coordinate{Latitude:22.6679807509,Longitude:113.8106668351}
 	err = client.GeoAdd("test",BaoanCoordinate,"baoan")
 	if err != nil{
 		t.Errorf("%s\r\n", err.Error())
