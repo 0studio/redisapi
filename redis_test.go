@@ -401,3 +401,58 @@ func TestSadd(t *testing.T) {
 	}
 
 }
+
+
+func TestGeo(t *testing.T){
+	client, err := InitDefaultClient(":6379")
+	if err != nil {
+		t.Errorf("%s\r\n", err.Error())
+	}
+	err = client.GeoAdd("test",Coordinate{latitude:22.8777898943,longitude:114.6834120888},"huizhou")
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	err = client.GeoAdd("test",Coordinate{latitude:22.4421753709,longitude:114.1678601427},"hongkong")
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+	BaoanCoordinate := Coordinate{latitude:22.6679807509,longitude:113.8106668351}
+	err = client.GeoAdd("test",BaoanCoordinate,"baoan")
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+
+	v,err := client.GeoPos("test","baoan")
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+	fmt.Print(v)
+	dis, err := client.GeoDist("test","baoan","hongkong",DistanceUnitKM)
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+	fmt.Println(dis)
+
+
+	c,err := client.GeoPos("test","baoan")
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+	fmt.Println(c)
+
+
+	coor,err := client.GeoRadius("test",BaoanCoordinate,2000,SetDistancUnit(DistanceUnitKM),SetSort(ASC),SetWith(WITHBOth))
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+	fmt.Println(coor)
+
+
+	coor,err = client.GeoRadiusByMember("test","hongkong",200,SetDistancUnit(DistanceUnitKM),SetSort(ASC),SetWith(WITHBOth))
+	if err != nil{
+		t.Errorf("%s\r\n", err.Error())
+	}
+	fmt.Printf("%s\n",(*coor)[2].value)
+
+}
